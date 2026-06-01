@@ -581,7 +581,25 @@ fi
 
 echo -e "\n=== Installing Custom Nodes ==="
 
-install_node 'comfyui-kjnodes' 'https://github.com/kijai/ComfyUI-KJNodes' 'pillow color-matcher matplotlib' ''
+install_node 'comfyui-kjnodes' 'https://github.com/kijai/ComfyUI-KJNodes' 'matplotlib' ''
+# Pin KJNodes to v1.4.0 — find commit where pyproject.toml has version = "1.4.0"
+KJNODES_DIR="$COMFY/custom_nodes/ComfyUI-KJNodes"
+if [ -d "$KJNODES_DIR/.git" ]; then
+    log "  Pinning comfyui-kjnodes to v1.4.0..."
+    KJNODES_COMMIT=$(git -C "$KJNODES_DIR" fetch --unshallow >/dev/null 2>&1; git -C "$KJNODES_DIR" log --oneline --all -- pyproject.toml 2>/dev/null | while read sha msg; do
+        if git -C "$KJNODES_DIR" show "$sha:pyproject.toml" 2>/dev/null | grep -q 'version = "1.4.0"'; then
+            echo "$sha"
+            break
+        fi
+    done)
+    if [ -n "$KJNODES_COMMIT" ]; then
+        git -C "$KJNODES_DIR" checkout "$KJNODES_COMMIT" -- . >/dev/null 2>&1 && \
+            log "  ✓ comfyui-kjnodes pinned to v1.4.0 (commit $KJNODES_COMMIT)" || \
+            log "  ⚠ comfyui-kjnodes: checkout to v1.4.0 failed, using latest"
+    else
+        log "  ⚠ comfyui-kjnodes: v1.4.0 commit not found in history, using latest"
+    fi
+fi
 install_node 'comfyui-videohelpersuite' 'https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite' 'opencv-python imageio-ffmpeg' ''
 install_node 'comfyui-supernodes' 'https://github.com/sonnybox/ComfyUI-SuperNodes' 'matplotlib' ''
 install_node 'comfyui-wanvideowrapper' 'https://github.com/kijai/ComfyUI-WanVideoWrapper' '' ''
