@@ -69,10 +69,18 @@ else
     log "✅ HF_TOKEN успешно загружен из Vast.ai"
 fi
 
+# === CIVITAI_TOKEN ===
+if [ -z "${CIVITAI_TOKEN}" ]; then
+    log "⚠️  CIVITAI_TOKEN не задан в Environment Variables Vast.ai!"
+    log "   Добавьте переменную CIVITAI_TOKEN перед запуском инстанса."
+else
+    log "✅ CIVITAI_TOKEN успешно загружен из Vast.ai"
+fi
+
 # === Environment ===
 export GIT_TERMINAL_PROMPT=0
 export HF_TOKEN="${HF_TOKEN}"
-CIVITAI_TOKEN='df502a1f2104acee436a6f133cb58d75'
+CIVITAI_TOKEN="${CIVITAI_TOKEN}"
 
 BSP="--break-system-packages"
 
