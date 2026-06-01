@@ -1,7 +1,7 @@
 #!/bin/bash
 # SetupMyWF — Vast.ai Setup Script
 # Generated: 2026-05-27
-# Models: 12 | Nodes: 9
+# Models: 16 | Nodes: 10
 
 # === Error Accumulation (KB 4.2) ===
 ERRORS=()
@@ -198,7 +198,7 @@ install_node() {
     local DEP_WARNINGS=0
     NODES_TOTAL=$((NODES_TOTAL + 1))
 
-    log "📦 Нода [${NODES_TOTAL}/9]: $CNR_ID"
+    log "📦 Нода [${NODES_TOTAL}/10]: $CNR_ID"
 
     if [ -d "$NODE_DIR" ]; then
         local CURRENT_REMOTE=$(git -C "$NODE_DIR" remote get-url origin 2>/dev/null || echo "")
@@ -594,6 +594,7 @@ install_node 'comfyui-wananimatepreprocess' 'https://github.com/kijai/ComfyUI-Wa
 install_node 'rgthree-comfy' 'https://github.com/rgthree/rgthree-comfy' '' ''
 install_node 'comfyui-sam3' 'https://github.com/PozzettiAndrea/ComfyUI-SAM3' 'timm' ''
 install_node 'comfyui-swwan' 'https://github.com/aining2022/ComfyUI_Swwan' '' ''
+install_node 'comfyui_face_parsing' 'https://github.com/Ryuukeisyou/comfyui_face_parsing' 'opencv-contrib-python torchvision ultralytics matplotlib' ''
 
 log_section "🔍 Проверка модулей ComfyUI"
 COMFY_COMPAT_OK=1
@@ -624,6 +625,11 @@ download_hf 'Ludka8008/co-wan-m' 'models/detection/vitpose_h_wholebody_model.onn
 download_hf 'Kijai/vitpose_comfy' 'onnx/vitpose_h_wholebody_data.bin' "$COMFY/models/detection"
 download_hf 'Ludka8008/co-wan-m' 'models/detection/yolov10m.onnx' "$COMFY/models/detection"
 download_hf 'Ludka8008/co-wan-m' 'models/controlnet/Wan21_Uni3C_controlnet_fp16.safetensors' "$COMFY/models/controlnet"
+# === face_parsing (SegFormer) — голова/волосы/шея для маски ===
+download_hf 'jonathandinu/face-parsing' 'config.json' "$COMFY/models/face_parsing"
+download_hf 'jonathandinu/face-parsing' 'preprocessor_config.json' "$COMFY/models/face_parsing"
+download_hf 'jonathandinu/face-parsing' 'model.safetensors' "$COMFY/models/face_parsing"
+download_hf 'Bingsu/adetailer' 'face_yolov8m.pt' "$COMFY/models/ultralytics/bbox"
 
 log_section "🔍 Проверка моделей"
 MODELS_TOTAL=0
@@ -639,6 +645,8 @@ verify_model "$COMFY/models/diffusion_models/WanModel.safetensors" 'WanModel.saf
 verify_model "$COMFY/models/detection/vitpose_h_wholebody_model.onnx" 'vitpose_h_wholebody_model.onnx'
 verify_model "$COMFY/models/detection/yolov10m.onnx" 'yolov10m.onnx'
 verify_model "$COMFY/models/controlnet/Wan21_Uni3C_controlnet_fp16.safetensors" 'Wan21_Uni3C_controlnet_fp16.safetensors'
+verify_model "$COMFY/models/face_parsing/model.safetensors" 'face_parsing/model.safetensors'
+verify_model "$COMFY/models/ultralytics/bbox/face_yolov8m.pt" 'face_yolov8m.pt'
 
 
 # === sage-attention ===
