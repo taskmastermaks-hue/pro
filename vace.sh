@@ -590,7 +590,25 @@ install_node 'comfyui_layerstyle' 'https://github.com/chflame163/ComfyUI_LayerSt
 install_node 'was-node-suite-comfyui' 'https://github.com/WASasquatch/was-node-suite-comfyui' 'cmake fairscale git+https://github.com/WASasquatch/img2texture.git git+https://github.com/WASasquatch/cstr gitpython imageio joblib matplotlib numba numpy opencv-python-headless[ffmpeg] pilgram git+https://github.com/WASasquatch/ffmpy.git rembg scikit-image scikit-learn scipy timm tqdm transformers' ''
 install_node 'comfyui-easy-use' 'https://github.com/yolain/ComfyUI-Easy-Use' 'diffusers accelerate clip_interrogator sentencepiece lark onnxruntime spandrel opencv-python-headless matplotlib peft' ''
 install_node 'comfyui_essentials' 'https://github.com/cubiq/ComfyUI_essentials' 'numba colour-science rembg pixeloe' ''
-install_node 'comfyui-kjnodes' 'https://github.com/kijai/ComfyUI-KJNodes' 'pillow color-matcher matplotlib' ''
+install_node 'comfyui-kjnodes' 'https://github.com/kijai/ComfyUI-KJNodes' 'matplotlib' ''
+# Pin KJNodes to v1.4.0 — find commit where pyproject.toml has version = "1.4.0"
+KJNODES_DIR="$COMFY/custom_nodes/ComfyUI-KJNodes"
+if [ -d "$KJNODES_DIR/.git" ]; then
+    log "  Pinning comfyui-kjnodes to v1.4.0..."
+    KJNODES_COMMIT=$(git -C "$KJNODES_DIR" fetch --unshallow >/dev/null 2>&1; git -C "$KJNODES_DIR" log --oneline --all -- pyproject.toml 2>/dev/null | while read sha msg; do
+        if git -C "$KJNODES_DIR" show "$sha:pyproject.toml" 2>/dev/null | grep -q 'version = "1.4.0"'; then
+            echo "$sha"
+            break
+        fi
+    done)
+    if [ -n "$KJNODES_COMMIT" ]; then
+        git -C "$KJNODES_DIR" checkout "$KJNODES_COMMIT" -- . >/dev/null 2>&1 && \
+            log "  ✓ comfyui-kjnodes pinned to v1.4.0 (commit $KJNODES_COMMIT)" || \
+            log "  ⚠ comfyui-kjnodes: checkout to v1.4.0 failed, using latest"
+    else
+        log "  ⚠ comfyui-kjnodes: v1.4.0 commit not found in history, using latest"
+    fi
+fi
 install_node 'comfyui-depthcrafter-nodes' 'https://github.com/akatz-ai/ComfyUI-DepthCrafter-Nodes' 'torch diffusers accelerate' ''
 install_node 'comfyui-videohelpersuite' 'https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite' 'opencv-python imageio-ffmpeg' ''
 install_node 'comfyui_controlnet_aux' 'https://github.com/Fannovel16/comfyui_controlnet_aux' 'mediapipe==0.10.14' ''
